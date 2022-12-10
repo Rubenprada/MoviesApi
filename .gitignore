@@ -1,0 +1,4 @@
+/node_modules
+.env
+character.seed.js
+package-lock.json
