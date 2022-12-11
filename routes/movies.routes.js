@@ -97,13 +97,15 @@ moviesRoutes.post('/', [upload.single('picture')], async (req, res, next) => {
         //cogemos el path(ruta imagen o archivo que viene en la req)
         const filePath = req.file ? req.file.path : null;
         //pasamos la imagen con imageToUri
-        const picture = imageToUri(filePath);
+        const picture = filePath ? imageToUri(filePath) : undefined;
         //aplicamos el schema 
         const newMovie = new Movies({ ...req.body, picture });
         //guardamos la nueva pelicula en la DB
         const createdMovie = await newMovie.save();
         //desvinculamos el archivo subido por multer
-        await fs.unlinkSync(filePath);
+        if (filePath) {
+            await fs.unlinkSync(filePath);
+        }
         return res.status(201).json(createdMovie);
     } catch (err) {
         next(err);

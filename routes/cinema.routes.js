@@ -43,7 +43,7 @@ cinemaRouter.post('/', [upload.single('picture'), uploadToCloudinary], async (re
 });
 
 //añadimos un endpoit PUT para meter peliculas en los cines
-cinemaRouter.put('/add-movie',[isAuth], async(req, res, next) => {
+cinemaRouter.put('/add-movie', [isAuth], async(req, res, next) => {
     try{
         const {cinemaId, moviesId} = req.body;
         if(!cinemaId) {

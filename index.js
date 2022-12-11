@@ -122,7 +122,7 @@ server.use('*', (req, res, next) => {
 });
 
 server.use((err, req, res, next) => {
-    return res.status(err.status || 500).json(err.mensaje || 'error inesperado')
+    return res.status(err.status || 500).json(err.message || 'error inesperado')
 });
 
 //hacemos un listen para ver donde escucha el servidor y en que puerto
@@ -131,5 +131,3 @@ server.listen(PORT, () => {
     console.log(`Url: http//localhost:${PORT}`);
 });
 
-//exportamos el server para vercel
-module.exports = server;
