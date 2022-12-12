@@ -9,6 +9,8 @@ const createError = require('../utils/errors/create-errors');
 
 //importamos autenticacion
 const isAuth = require('../utils/middlewares/auth.middleware.js');
+const isAunthAdmin = require('../utils//middlewares/adminAuth.middleware.js');
+
 //importamos subida de archivos
 const upload = require('../utils/middlewares/file.middleware.js');
 
@@ -22,7 +24,7 @@ const uploadToCloudinary = require('../utils/middlewares/cloudinary.middleware.j
 const cinemaRouter = express.Router();
 
 //endpoint get para cines para obtener todos
-cinemaRouter.get('/', async (req, res, next) => {
+cinemaRouter.get('/', [isAuth], async (req, res, next) => {
     try{
         const cinemas = await Cinema.find().populate('movies');
         return res.status(200).json(cinemas);
@@ -32,7 +34,7 @@ cinemaRouter.get('/', async (req, res, next) => {
 });
 
 //endpoit post para cines y asi crear cines subir fotos con cloudinary
-cinemaRouter.post('/', [upload.single('picture'), uploadToCloudinary], async (req, res, next) => {
+cinemaRouter.post('/', [upload.single('picture'), uploadToCloudinary, isAunthAdmin], async (req, res, next) => {
     try{
         const newCinema = new Cinema({...req.body, picture: req.file_url});
         const createdCinema = await newCinema.save();
@@ -43,7 +45,7 @@ cinemaRouter.post('/', [upload.single('picture'), uploadToCloudinary], async (re
 });
 
 //añadimos un endpoit PUT para meter peliculas en los cines
-cinemaRouter.put('/add-movie', [isAuth], async(req, res, next) => {
+cinemaRouter.put('/add-movie', [isAunthAdmin], async(req, res, next) => {
     try{
         const {cinemaId, moviesId} = req.body;
         if(!cinemaId) {
@@ -57,7 +59,7 @@ cinemaRouter.put('/add-movie', [isAuth], async(req, res, next) => {
             { $push : {movies : moviesId}},
             {new : true}
         );
-        return res.status(200).json(updatedCinema)
+        return res.status(201).json(updatedCinema)
     } catch (err) {
         next(err)
     }

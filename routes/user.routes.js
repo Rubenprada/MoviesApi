@@ -9,8 +9,14 @@ const passport = require('passport');
 //llamamos a el esquema de usuarios
 const User = require('../models/Users.js');
 
+//llamamos el esquema de movies
+const Movies = require('../models/Movies.js')
+
 //llamamos a el manejador de errores
 const createError = require('../utils/errors/create-errors.js');
+
+const isAunthAdmin = require('../utils//middlewares/adminAuth.middleware.js');
+const isAuth = require('../utils/middlewares/auth.middleware.js');
 
 //llamamos a el encriptador
 const bcrypt = require('bcrypt');
@@ -73,6 +79,64 @@ userRouter.post('/logout', (req, res, next) => {
         });
     } else {
         return res.status(304).json('No hay nadie logeado')
+    }
+});
+
+
+//endpoint para obtener todos los usuarios
+userRouter.get('/', [isAunthAdmin], async (req, res, next) => {
+    try {
+        const allUsers = await User.find({}, {password: 0}).sort({role: 1}).populate('favoriteMovies');
+        if (allUsers.length === 0) {
+            return res.status(200).json('No hay usuarios registrados');
+        }
+        return res.status(200).json(allUsers)
+    } catch (error) {
+        return next(error)
+    }
+});
+
+//endpoint para meter añadir peliculas cono favoritas
+userRouter.put('/add-favorite-movie', [isAunthAdmin],async (req, res, next) => {
+    try {
+        const { userId, movieId } = req.body;
+        const currentMovie = await Movies.findById(movieId);
+        const currentFavoriteCount = currentMovie.favoriteCount;
+        const favoriteUpdated = await Movies.findByIdAndUpdate(
+            movieId,
+            { $set: { favoriteCount: currentFavoriteCount + 1 } },
+            { new: true }
+        );
+        const userUpdated = await User.findByIdAndUpdate(
+            userId,
+            { $push: { favoriteMovies: currentMovie } },
+            { new: true }
+        );
+        return res.status(201).json(userUpdated);
+    } catch (error) {
+        return next(error)
+    }
+});
+
+//endpoint para eliminar peliculas favoritas
+userRouter.put('/remove-favorite-movie',  [isAunthAdmin],async (req, res, next) => {
+    try {
+        const { userId, movieId } = req.body;
+        const currentMovie = await Movies.findById(movieId);
+        const currentFavoriteCount = currentMovie.favoriteCount;
+        const favoriteUpdated = await Movies.findByIdAndUpdate(
+            movieId,
+            { $set: { favoriteCount: currentFavoriteCount  -1 } },
+            { new: true }
+        );
+        const userUpdated = await User.findByIdAndUpdate(
+            userId,
+            { $pull: { favoriteMovies: movieId } },
+            { new: true }
+        );
+        return res.status(201).json(userUpdated);
+    } catch (error) {
+        return next(error)
     }
 });
 

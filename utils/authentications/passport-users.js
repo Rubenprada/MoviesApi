@@ -41,6 +41,7 @@ passport.use(
         const newUser = new User({
           email,
           password: encPassword,
+          role: req.body.role
         });
         //Guardamos al user en BD
         const savedUser = await newUser.save();
@@ -89,7 +90,7 @@ passport.use(
   )
 );
 
-//registrar user en l DB por id
+//registrar user en la DB por id
 passport.serializeUser((user, done) => {
   return done(null, user._id);
 });

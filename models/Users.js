@@ -13,6 +13,10 @@ const userSchema = new mongoose.Schema({
         match: [/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/, 'El email introducido no tiene un formato válido']
     },
     password: {type: String, required: true},
+    //añadimos roles, si no se pone nada será usuario basico
+    role: { type: String, default: 'basic', enum: ['basic', 'admin'] },
+    //relacionamos con la colección de Movies
+    favoriteMovies: [{ type: mongoose.Types.ObjectId, ref: 'Movies' }],
 }, {
     timestamps: true
 });

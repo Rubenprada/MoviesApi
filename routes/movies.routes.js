@@ -14,6 +14,7 @@ const createError = require('../utils/errors/create-errors.js')
 
 //importamos autenticacion
 const isAuth = require('../utils/middlewares/auth.middleware.js');
+const isAunthAdmin = require('../utils//middlewares/adminAuth.middleware.js');
 
 //importamos subida de archivos
 const upload = require('../utils/middlewares/file.middleware.js');
@@ -30,7 +31,7 @@ const moviesRoutes = express.Router();
 
 
 //hacemos un endpoint get y en caso de /  vamos a recibir todas las peliculas
-moviesRoutes.get('/', async (req, res, next) => {
+moviesRoutes.get('/', [isAuth], async (req, res, next) => {
     try {
         //recuperamos todas las peliculas de DB
         const movies = await Movies.find();
@@ -42,7 +43,7 @@ moviesRoutes.get('/', async (req, res, next) => {
 });
 
 //hacemos un endpoint /:id para recuperar por su id
-moviesRoutes.get('/:id', async (req, res, next) => {
+moviesRoutes.get('/:id', [isAuth], async (req, res, next) => {
     //el id se encuentra dentro de los parametros de la req, la guardamos en una variable
     const id = req.params.id;
     try {
@@ -59,7 +60,7 @@ moviesRoutes.get('/:id', async (req, res, next) => {
 });
 
 //endpoint para buscar por su titulo
-moviesRoutes.get('/title/:title', async (req, res, next) => {
+moviesRoutes.get('/title/:title', [isAuth], async (req, res, next) => {
     const title = req.params.title;
     try {
         const movies = await Movies.find({title});
@@ -70,7 +71,7 @@ moviesRoutes.get('/title/:title', async (req, res, next) => {
 });
 
 //endpoint para buscar por genero
-moviesRoutes.get('/genre/:genre', async (req, res, next) => {
+moviesRoutes.get('/genre/:genre', [isAuth], async (req, res, next) => {
     const genre = req.params.genre;
     try {
         const movies = await Movies.find({genre: {$in: [genre] }});
@@ -81,7 +82,7 @@ moviesRoutes.get('/genre/:genre', async (req, res, next) => {
 });
  
 //endpoint para peliculas estrenadas a partir de 2010
-moviesRoutes.get('/year/:year', async (req, res, next) => {
+moviesRoutes.get('/year/:year', [isAuth], async (req, res, next) => {
     const year = req.params.year;
     try {
         const movies = await Movies.find({year: { $gte: 2010 }});
@@ -92,7 +93,7 @@ moviesRoutes.get('/year/:year', async (req, res, next) => {
 });
 
 //endpoint para crear una nueva pelicula y subida de imagenes
-moviesRoutes.post('/', [upload.single('picture')], async (req, res, next) => {
+moviesRoutes.post('/', [upload.single('picture'), isAunthAdmin] , async (req, res, next) => {
     try{
         //cogemos el path(ruta imagen o archivo que viene en la req)
         const filePath = req.file ? req.file.path : null;
@@ -113,7 +114,7 @@ moviesRoutes.post('/', [upload.single('picture')], async (req, res, next) => {
 });
 
 //endpoint para modificar peliculas
-moviesRoutes.put('/:id',[isAuth], async (req, res, next) => {
+moviesRoutes.put('/:id', [isAunthAdmin], async (req, res, next) => {
     try{
         const id = req.params.id;
         const modifiedMovie = new Movies({...req.body});
@@ -130,7 +131,7 @@ moviesRoutes.put('/:id',[isAuth], async (req, res, next) => {
 });
 
 //endpoint para eliminar peliculas
-moviesRoutes.delete('/:id',[isAuth], async (req, res, next) => {
+moviesRoutes.delete('/:id', [isAunthAdmin], async (req, res, next) => {
     try {
         const id = req.params.id;
         await Movies.findByIdAndDelete(id);
