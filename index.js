@@ -74,9 +74,6 @@ server.use(express.static(path.join(__dirname, 'public')));
 //ruta passport para users
 require('./utils/authentications/passport-users.js');
 
-//ruta para admins
-// require('./utils/authentications/passport-admin.js');
-
 //gestión de sesiones
 server.use(session({
     secret: process.env.SESSION_SECRET_KEY,
@@ -105,9 +102,6 @@ server.get('/', (req, res) => {
 
 //ruta para usuarios
 server.use('/user', userRouter);
-
-//ruta para admin
-// server.use('/admin', adminRouter);
 
 //hacemos una ruta para las peliculas, lleva de argumento la ruta
 //para las peliculas, y el router de peliculas
